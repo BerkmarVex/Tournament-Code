@@ -5,8 +5,6 @@ int analogRead ( unsigned char  channel );
 void motorSet(unsigned char channel, int speed);
 bool joystickGetDigital (unsigned char joystick, unsigned char buttonGroup, unsigned char button);
 int joystickGetAnalog ( unsigned char joystick, unsigned char axis);
-TaskHandle taskRunLoop(void (*fn)(void), const unsigned long increment);
-TaskHandle taskCreate (TaskCode taskCode, const unsigned int stackDepth, void * parameters, const unsigned int priority);
 
 bool leftShoulderButtonUp;
 bool leftShoulderButtonDown;
@@ -83,10 +81,10 @@ void shoulderbutton(bool check) {
 		}
 
 		else if(leftShoulderButtonDown){
-		glift.dValue = 1333;
-		motorSet(4, glift.output);
-		return;
-	}
+			glift.dValue = 1333;
+			motorSet(4, glift.output);
+			return;
+		}
 	}
 	if(rightShoulderButtonUp || rightShoulderButtonDown){
 		if(rightShoulderButtonUp){
@@ -99,8 +97,8 @@ void shoulderbutton(bool check) {
 	if(!check){
 	motorSet(4, 0);
 	return;
-}
-}
+	}
+};
 
 
 void linereader(){
@@ -109,39 +107,38 @@ void linereader(){
 	if(line <= 2850){
 		hasCone = true;
 		delay(40);
-			glift.dValue = 3100;
-			motorSet(4, glift.output);
-			shoulderbutton(hasCone);
+		glift.dValue = 3100;
+		motorSet(4, glift.output);
+		shoulderbutton(hasCone);
 		return;
 	}
-
+	
 	hasCone = false;
 	shoulderbutton(hasCone);
 	return;
-}
+};
 
 
 
 void drive(){
 	update();
 	if ((rightlever >=90 && rightlever <= 120) || (rightlever>=-90 && rightlever<=-120)) {
-        // divide number between 90 and 120, -90 and -120, to make the controls more precise
-        if (rightlever%2 == 1 || rightlever%2 == -1) { //make power variable even so it can be divided by 2
-          rightlever++;
-        }
-        rightlever = rightlever/2;
-      }
-      if ((leftlever >=-90 && leftlever <= -120) || (leftlever >=90 && leftlever <= 120)) {
-        // divide number between 90 and 120, -90 and -120, to make the controls more precise
-        if (leftlever%2 == 1 || leftlever%2 == -1){ // make power2 variable even so it can be divided by 2
-          leftlever++;
-        }
-        leftlever = leftlever/2;
-
-      }
-			motorSet(2, rightlever);
-      motorSet(3, leftlever);
-}
+      // divide number between 90 and 120, -90 and -120, to make the controls more precise
+    if (rightlever%2 == 1 || rightlever%2 == -1) { //make power variable even so it can be divided by 2
+      rightlever++;
+    }
+    rightlever = rightlever/2;
+  }
+  if ((leftlever >=-90 && leftlever <= -120) || (leftlever >=90 && leftlever <= 120)) {
+    	// divide number between 90 and 120, -90 and -120, to make the controls more precise
+    if (leftlever%2 == 1 || leftlever%2 == -1){ // make power2 variable even so it can be divided by 2
+        leftlever++;
+    }
+  	leftlever = leftlever/2;
+  }
+	motorSet(2, rightlever);
+  motorSet(3, leftlever);
+};
 
 void operatorControl() {
 	analogCalibrate(2);
@@ -160,4 +157,4 @@ void operatorControl() {
 	  //printf("%d\n", line);
 		delay(20);
 	}
-}
+};
