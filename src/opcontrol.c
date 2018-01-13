@@ -72,22 +72,18 @@ void shoulderbutton(bool check) {
 
 		if(leftShoulderButtonUp && leftShoulderButtonDown){
 			glift.dValue = 2150;
-			//glpid();
 			motorSet(4, glift.output);
-			printf("IT WORKED\n");
 			return;
 		}
 
 		else if(leftShoulderButtonUp){
 			glift.dValue = 3100;
-			//glpid();
 			motorSet(4, glift.output);
 			return;
 		}
 
 		else if(leftShoulderButtonDown){
-		glift.dValue = 1353;
-		//glpid();
+		glift.dValue = 1333;
 		motorSet(4, glift.output);
 		return;
 	}
@@ -151,7 +147,6 @@ void operatorControl() {
 	analogCalibrate(2);
 	imeReset(IME_RIGHT_MOTOR);
 	imeReset(IME_LEFT_MOTOR);
-	//TaskHandle goalliftpid = taskCreate(glpid(), 4, NULL, 0);
 	while (1) {
 		imeGet(0, &count);
 		imeGet(1, &counts);
