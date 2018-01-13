@@ -70,32 +70,32 @@ void shoulderbutton(bool check) {
 
 		if(leftShoulderButtonUp && leftShoulderButtonDown){
 			glift.dValue = 2150;
-			motorSet(4, glift.output);
+			motorSet(9, glift.output);
 			return;
 		}
 
 		else if(leftShoulderButtonUp){
 			glift.dValue = 3100;
-			motorSet(4, glift.output);
+			motorSet(9, glift.output);
 			return;
 		}
 
 		else if(leftShoulderButtonDown){
 			glift.dValue = 1333;
-			motorSet(4, glift.output);
+			motorSet(9, glift.output);
 			return;
 		}
 	}
 	if(rightShoulderButtonUp || rightShoulderButtonDown){
 		if(rightShoulderButtonUp){
-			motorSet(4, 100);
+			motorSet(9, 100);
 			return;
 		}
-		motorSet(4, -100);
+		motorSet(9, -100);
 		return;
 	}
 	if(!check){
-	motorSet(4, 0);
+	motorSet(9, 0);
 	return;
 	}
 };
@@ -108,11 +108,11 @@ void linereader(){
 		hasCone = true;
 		delay(40);
 		glift.dValue = 3100;
-		motorSet(4, glift.output);
+		motorSet(9, glift.output);
 		shoulderbutton(hasCone);
 		return;
 	}
-	
+
 	hasCone = false;
 	shoulderbutton(hasCone);
 	return;
@@ -147,13 +147,13 @@ void operatorControl() {
 	while (1) {
 		imeGet(0, &count);
 		imeGet(1, &counts);
+		linereader();
 		glpid();
 		drive();
-		linereader();
-		printf("%d\n", hasCone);
+		//printf("%d\n", hasCone);
 		//printf("Left(%d), Right(%d)\n", count, counts);
-		printf("out(%d),aVal(%d),err(%d),want(%d),Kd(%d)\n", glift.output, glift.aValue, glift.pidError,glift.dValue, glift.derivative);
-		printf("%d\n", analogRead(1));
+		//printf("out(%d),aVal(%d),err(%d),want(%d),Kd(%d)\n", glift.output, glift.aValue, glift.pidError,glift.dValue, glift.derivative);
+		//printf("%d\n", analogRead(1));
 	  //printf("%d\n", line);
 		delay(20);
 	}
