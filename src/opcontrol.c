@@ -70,32 +70,33 @@ void shoulderbutton(bool check) {
 
 		if(leftShoulderButtonUp && leftShoulderButtonDown){
 			glift.dValue = 2150;
-			motorSet(9, glift.output);
+			motorSet(8, glift.output);
+			motorSet(8, glift.output);
 			return;
 		}
 
 		else if(leftShoulderButtonUp){
 			glift.dValue = 3100;
-			motorSet(9, glift.output);
+			motorSet(8 ,glift.output);
 			return;
 		}
 
 		else if(leftShoulderButtonDown){
 			glift.dValue = 1333;
-			motorSet(9, glift.output);
+			motorSet(8, glift.output);
 			return;
 		}
 	}
 	if(rightShoulderButtonUp || rightShoulderButtonDown){
 		if(rightShoulderButtonUp){
-			motorSet(9, 100);
+			motorSet(8, 100);
 			return;
 		}
-		motorSet(9, -100);
+		motorSet(8, -100);
 		return;
 	}
 	if(!check){
-	motorSet(9, 0);
+	motorSet(8, 0);
 	return;
 	}
 };
@@ -108,7 +109,7 @@ void linereader(){
 		hasCone = true;
 		delay(40);
 		glift.dValue = 3100;
-		motorSet(9, glift.output);
+		motorSet(8, glift.output);
 		shoulderbutton(hasCone);
 		return;
 	}
@@ -136,8 +137,8 @@ void drive(){
     }
   	leftlever = leftlever/2;
   }
-	motorSet(2, rightlever);
-  motorSet(3, leftlever);
+	motorSet(2, rightlever);	
+  motorSet(3, -leftlever);
 };
 
 void operatorControl() {
