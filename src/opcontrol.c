@@ -1,4 +1,4 @@
-/************
+analogRead(POTanalogRead(POTanalogRead(POTanalogRead(POTanalogRead(POTanalogRead(POTanalogRead(POT/************
 *  imports  *
 *************/
 
@@ -26,6 +26,9 @@ bool hasCone = false;
 
 const int LEFTMOTOR = 2;
 const int RIGHTMOTOR = 3;
+const int GLMOTOR = 9;
+const int GLIGHT = 2;
+const int POT = 1;
 
 //Controller variables
 
@@ -83,7 +86,7 @@ void glpid() {
 	glift.pidKd = 0.4;
 	glift.iTime = 500;
 	glift.bias = 0;
-	glift.aValue = analogRead(1);
+	glift.aValue = analogRead(POT);
 
 	glift.pidError = glift.dValue - glift.aValue;
 	glift.integral = glift.integral + (glift.pidError);
@@ -116,7 +119,7 @@ void update() {
 	checkPressed();
 
 	//Linereader
-	line = analogRead(2);
+	line = analogRead(GLIGHT);
 };
 
 void shoulderbutton(bool check) {
@@ -124,36 +127,36 @@ void shoulderbutton(bool check) {
 	if(leftShoulderButtonUp || leftShoulderButtonDown) {
 		if(leftShoulderButtonUp && leftShoulderButtonDown) {
 			glift.dValue = 2150;
-			motorSet(8, glift.output);
-			motorSet(8, glift.output);
+			motorSet(GLMOTOR, glift.output);
+			motorSet(GLMOTOR, glift.output);
 			return;
 		}
 
 		else if(leftShoulderButtonUp) {
 			glift.dValue = 3100;
-			motorSet(8 ,glift.output);
+			motorSet(GLMOTOR ,glift.output);
 			return;
 		}
 
 		else if(leftShoulderButtonDown) {
 			glift.dValue = 1333;
-			motorSet(8, glift.output);
+			motorSet(GLMOTOR, glift.output);
 			return;
 		}
 	}
 	if(rightShoulderButtonUp || rightShoulderButtonDown) {
 		if(rightShoulderButtonUp) {
-			motorSet(8, 100);
+			motorSet(GLMOTOR, 100);
 			return;
 		}
 		else {
-			motorSet(8, -100);
+			motorSet(GLMOTOR, -100);
 			return;
 		}
 	}
 	if(!check) {
-		motorSet(8, 0);
-	return;
+		motorSet(GLMOTOR, 0);
+		return;
 	}
 };
 
@@ -245,7 +248,7 @@ void linereader() {
 		hasCone = true;
 		delay(40);
 		glift.dValue = 3100;
-		motorSet(8, glift.output);
+		motorSet(GLMOTOR, glift.output);
 		shoulderbutton(hasCone);
 		return;
 	}
