@@ -1,24 +1,59 @@
+/************
+*  imports  *
+*************/
+
 #include "main.h"
 #include <math.h>
 
-int analogRead ( unsigned char  channel );
-void motorSet(unsigned char channel, int speed);
-bool joystickGetDigital (unsigned char joystick, unsigned char buttonGroup, unsigned char button);
-int joystickGetAnalog ( unsigned char joystick, unsigned char axis);
+/*************************
+*  local initialization  *
+**************************/
+
+//Lift variables
 
 bool leftShoulderButtonUp;
 bool leftShoulderButtonDown;
 bool rightShoulderButtonUp;
 bool rightShoulderButtonDown;
-int rightlever;
-int leftlever;
+
+//Sensor variables
 int count;
 int counts;
-int asd;
-int dsa;
 int line;
 bool hasCone = false;
+
+//Motor variables
+
+const int LEFTMOTOR = 2;
+const int RIGHTMOTOR = 3;
+
+//Controller variables
+
+int leftJoyV;
+int leftJoyH;
+int rightJoy;
+int rightJoyH;
+bool rightR = false;
+bool rightRcheck;
+bool stillPressed = false;
+bool prevRightRcheck = false;
+
+//Function definition
+
+void dualzone();
+void checkPressed();
+void update();
+void tank();
+void arcade();
+void update();
+void drive();
+void glpid();
 void shoulderbutton(bool check);
+void linereader();
+
+/************************
+*  structure definition  *
+*************************/
 
 struct pid {
 	int aValue;
@@ -38,6 +73,10 @@ struct pid {
 
 struct pid glift;
 
+/************************
+*  function definition  *
+*************************/
+
 void glpid() {
 	glift.pidKp = 0.2;
 	glift.pidKi = 0.0;
@@ -55,57 +94,154 @@ void glpid() {
 };
 
 void update() {
+ /***********************************************************************
+	*  this function just updates the varables that get used every cylce  *
+	***********************************************************************/
+
+	//Button Group
 	leftShoulderButtonUp = joystickGetDigital(1, 6, JOY_UP);
 	leftShoulderButtonDown = joystickGetDigital(1, 6, JOY_DOWN);
 	rightShoulderButtonUp = joystickGetDigital(1, 5, JOY_UP);
 	rightShoulderButtonDown = joystickGetDigital(1, 5, JOY_DOWN);
-	rightlever = joystickGetAnalog(1,3);
-	leftlever = joystickGetAnalog(1,2);
+
+	//Joystick
+	leftJoyV = joystickGetAnalog(1, 3);
+	leftJoyH = joystickGetAnalog(1, 4);
+	rightJoy = joystickGetAnalog(1, 2);
+	rightJoyH = joystickGetAnalog(1, 1);
+	rightRcheck = joystickGetDigital(1, 8, JOY_RIGHT);
+
+	//Functions
+	dualzone();
+	checkPressed();
+
+	//Linereader
 	line = analogRead(2);
 };
 
 void shoulderbutton(bool check) {
 	update();
-	if(leftShoulderButtonUp || leftShoulderButtonDown){
-
-		if(leftShoulderButtonUp && leftShoulderButtonDown){
+	if(leftShoulderButtonUp || leftShoulderButtonDown) {
+		if(leftShoulderButtonUp && leftShoulderButtonDown) {
 			glift.dValue = 2150;
 			motorSet(8, glift.output);
 			motorSet(8, glift.output);
 			return;
 		}
 
-		else if(leftShoulderButtonUp){
+		else if(leftShoulderButtonUp) {
 			glift.dValue = 3100;
 			motorSet(8 ,glift.output);
 			return;
 		}
 
-		else if(leftShoulderButtonDown){
+		else if(leftShoulderButtonDown) {
 			glift.dValue = 1333;
 			motorSet(8, glift.output);
 			return;
 		}
 	}
-	if(rightShoulderButtonUp || rightShoulderButtonDown){
-		if(rightShoulderButtonUp){
+	if(rightShoulderButtonUp || rightShoulderButtonDown) {
+		if(rightShoulderButtonUp) {
 			motorSet(8, 100);
 			return;
 		}
-		motorSet(8, -100);
-		return;
+		else {
+			motorSet(8, -100);
+			return;
+		}
 	}
-	if(!check){
-	motorSet(8, 0);
+	if(!check) {
+		motorSet(8, 0);
 	return;
 	}
 };
 
+void buttonStatus() {
+ /*************************************************************
+	*  This function is used to ensure that the varable rightR  *
+	*  does not get changed if the user holds down the switch   *
+	*  button for more than 20 milliseconds                     *
+ 	*************************************************************/
+	if(rightRcheck == true) {
+		if(rightRcheck == !prevRightRcheck) {
+			stillPressed = false;
+		}
+		else{
+			stillPressed = true;
+		}
+	}
+	else if(rightRcheck == false) {
+		stillPressed = false;
+	}
+}
 
-void linereader(){
+void checkPressed() {
+ /*************************************************************
+	*  this function switches tank and arcade controls          *
+	*  this if statments take in 3 booleans                     *
+	*  if the button was pressed for an extended amount of time *
+	*	 if the button was pressed                                *
+	*  and the current drive style                              *
+	*************************************************************/
+	buttonStatus();
+	if (!stillPressed && rightRcheck && rightR) {
+		rightR = false;
+	}
+	else if (!stillPressed && rightRcheck && !rightR) {
+		rightR = true;
+	}
+}
+
+void dualzone() {
+ /*********************************************************
+  *  This function zones the controller to have a slower  *
+	*  inner ring to allow for more precise controll and    *
+	*	 a faster outer ring for faster movment               *
+  *********************************************************/
+	if((rightJoy >=90 && rightJoy <= 120) || (rightJoy>=-90 && rightJoy<=-120)) {
+    rightJoy = rightJoy/2;
+  }
+
+  else if((leftJoyV >=-90 && leftJoyV <= -120) || (leftJoyV >=90 && leftJoyV <= 120)) {
+		leftJoyV = leftJoyV/2;
+  }
+
+	else if((leftJoyH >=-90 && leftJoyH <= -120) || (leftJoyH >=90 && leftJoyH <= 120)) {
+	  	leftJoyH = leftJoyH/2;
+	}
+
+	else if((rightJoyH >=-90 && rightJoyH <= -120) || (rightJoyH >=90 && rightJoyH <= 120)) {
+			rightJoyH = rightJoyH/2;
+  }
+}
+
+void tank() {
+ /***********************************************************
+	  This function splits the controls for the               *
+		left and right motors to the left and right joy sticks  *
+	***********************************************************/
 	update();
+	motorSet(RIGHTMOTOR, -rightJoy);
+	motorSet(LEFTMOTOR, leftJoyV);
 
-	if(line <= 2850){
+}
+
+void arcade() {
+ /******************************************
+	*  This functions combines left and      *
+	*  right motor controls to the vertical  *
+  *  left and horizontal right joysticks   *
+	******************************************/
+	update();
+	motorSet(RIGHTMOTOR, -leftJoyV - rightJoyH);
+	motorSet(LEFTMOTOR, leftJoyV - rightJoyH);
+}
+
+
+void linereader() {
+	update();
+	if(line <= 2850) {
 		hasCone = true;
 		delay(40);
 		glift.dValue = 3100;
@@ -119,43 +255,30 @@ void linereader(){
 	return;
 };
 
-
-
-void drive(){
-	update();
-	if ((rightlever >=90 && rightlever <= 120) || (rightlever>=-90 && rightlever<=-120)) {
-      // divide number between 90 and 120, -90 and -120, to make the controls more precise
-    if (rightlever%2 == 1 || rightlever%2 == -1) { //make power variable even so it can be divided by 2
-      rightlever++;
-    }
-    rightlever = rightlever/2;
-  }
-  if ((leftlever >=-90 && leftlever <= -120) || (leftlever >=90 && leftlever <= 120)) {
-    	// divide number between 90 and 120, -90 and -120, to make the controls more precise
-    if (leftlever%2 == 1 || leftlever%2 == -1){ // make power2 variable even so it can be divided by 2
-        leftlever++;
-    }
-  	leftlever = leftlever/2;
-  }
-	motorSet(2, rightlever);	
-  motorSet(3, -leftlever);
-};
+void drive() {
+	if (!rightR) {
+		tank();
+	}
+	else if(rightR) {
+		arcade();
+	}
+}
 
 void operatorControl() {
+	/******************
+	*  main function  *
+	*******************/
+
 	analogCalibrate(2);
 	imeReset(IME_RIGHT_MOTOR);
 	imeReset(IME_LEFT_MOTOR);
+
 	while (1) {
 		imeGet(0, &count);
 		imeGet(1, &counts);
 		linereader();
 		glpid();
 		drive();
-		//printf("%d\n", hasCone);
-		//printf("Left(%d), Right(%d)\n", count, counts);
-		//printf("out(%d),aVal(%d),err(%d),want(%d),Kd(%d)\n", glift.output, glift.aValue, glift.pidError,glift.dValue, glift.derivative);
-		//printf("%d\n", analogRead(1));
-	  //printf("%d\n", line);
 		delay(20);
 	}
 };
