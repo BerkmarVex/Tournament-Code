@@ -21,11 +21,12 @@ int count;
 int counts;
 int line;
 bool hasCone = false;
+//Top,Mid,Bottom
+const int GLPIDPOS[] = {630,1530,2420};
+//Cortex Ports
 
-//Motor variables
-
-const int LEFTMOTOR = 2;
-const int RIGHTMOTOR = 3;
+const int LEFTMOTOR = 3;
+const int RIGHTMOTOR = 2;
 const int GLMOTOR = 9;
 const int GLIGHT = 2;
 const int POT = 1;
@@ -126,20 +127,20 @@ void shoulderbutton(bool check) {
 	update();
 	if(leftShoulderButtonUp || leftShoulderButtonDown) {
 		if(leftShoulderButtonUp && leftShoulderButtonDown) {
-			glift.dValue = 2150;
+			glift.dValue = GLPIDPOS[1];
 			motorSet(GLMOTOR, glift.output);
 			motorSet(GLMOTOR, glift.output);
 			return;
 		}
 
 		else if(leftShoulderButtonUp) {
-			glift.dValue = 3100;
+			glift.dValue = GLPIDPOS[0];
 			motorSet(GLMOTOR ,glift.output);
 			return;
 		}
 
 		else if(leftShoulderButtonDown) {
-			glift.dValue = 1333;
+			glift.dValue = GLPIDPOS[2];
 			motorSet(GLMOTOR, glift.output);
 			return;
 		}
@@ -237,8 +238,8 @@ void arcade() {
   *  left and horizontal right joysticks   *
 	******************************************/
 	update();
-	motorSet(RIGHTMOTOR, -leftJoyV - rightJoyH);
-	motorSet(LEFTMOTOR, leftJoyV - rightJoyH);
+	motorSet(RIGHTMOTOR, -leftJoyV + rightJoyH);
+	motorSet(LEFTMOTOR, leftJoyV + rightJoyH);
 }
 
 
@@ -247,7 +248,7 @@ void linereader() {
 	if(line <= 2850) {
 		hasCone = true;
 		delay(40);
-		glift.dValue = 3100;
+		glift.dValue = GLPIDPOS[0];
 		motorSet(GLMOTOR, glift.output);
 		shoulderbutton(hasCone);
 		return;
