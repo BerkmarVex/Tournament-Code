@@ -63,11 +63,25 @@ extern "C" {
         .derivative = 0,
         .target = 3000,
         .sensor = 0,
-        .bias = 15,
+        .bias = 0,
         .integral = 0
     };
 
-    static struct PID lift = {
+    static struct PID leftLift = {
+        .Kp = 0.2,
+        .Ki = 0.0,
+        .Kd = 0.8,
+        .error = 0,
+        .previous_error = 0,
+        .integral = 0,
+        .derivative = 0,
+        .target = 3000,
+        .sensor = 0,
+        .bias = 0,
+        .integral = 0
+    };
+
+    static struct PID RightLift = {
         .Kp = 0.2,
         .Ki = 0.0,
         .Kd = 0.8,

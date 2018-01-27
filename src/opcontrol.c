@@ -206,6 +206,11 @@ void arcade() {
 	motorSet(LEFTMOTOR, leftJoyV + rightJoyH);
 }
 
+void lift(){
+	motorSet(unsigned char channel, int speed);
+	motorSet();
+}
+
 
 void linereader() {
 	update();
@@ -268,7 +273,7 @@ void operatorControl() {
 		pidDo(&glLift);
 		drive();
 		//jinxMSGSend();
-		printf("out(%d), Sen(%d), Kd(%d), err(%d)\n", glLift.output, glLift.sensor, (int)glLift.derivative, glLift.error);
+		//printf("out(%d), Sen(%d), Kd(%d), err(%d)\n", glLift.output, glLift.sensor, (int)glLift.derivative, glLift.error);
 		delay(20);
 	}
 };
