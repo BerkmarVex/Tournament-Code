@@ -3,11 +3,14 @@
 *************/
 
 #include "main.h"
-#include <math.h>
+#include <pid.h>
 
 /*************************
 *  local initialization  *
 **************************/
+
+//JINX
+char jinxSend[20];
 
 //Lift variables
 
@@ -55,47 +58,7 @@ void glpid();
 void shoulderbutton(bool check);
 void linereader();
 
-/************************
-*  structure definition  *
-*************************/
 
-struct pid {
-	int aValue;
-	int dValue;
-	int pidError;
-	int priError;
-	double pidKp;
-	double pidKi;
-	double pidKd;
-	int	bias;
-	int	iTime;
-	int	integral;
-	int	derivative;
-	double pid;
-	int output;
-};
-
-struct pid glift;
-
-/************************
-*  function definition  *
-*************************/
-
-void glpid() {
-	glift.pidKp = 0.2;
-	glift.pidKi = 0.0;
-	glift.pidKd = 0.4;
-	glift.iTime = 500;
-	glift.bias = 0;
-	glift.aValue = analogRead(POT);
-
-	glift.pidError = glift.dValue - glift.aValue;
-	glift.integral = glift.integral + (glift.pidError);
-	glift.derivative = (glift.pidError - glift.priError);
-	glift.pid = (glift.pidKp) * glift.pidError + (glift.pidKi) * glift.integral + (glift.pidKd) * glift.derivative + glift.bias;
-	glift.output = (int) glift.pid;
-	glift.priError = glift.pidError;
-};
 
 void update() {
  /***********************************************************************
@@ -118,6 +81,7 @@ void update() {
 	//Functions
 	dualzone();
 	checkPressed();
+	glLift.sensor = analogRead(POT);
 
 	//Linereader
 	line = analogRead(GLIGHT);
@@ -127,21 +91,21 @@ void shoulderbutton(bool check) {
 	update();
 	if(leftShoulderButtonUp || leftShoulderButtonDown) {
 		if(leftShoulderButtonUp && leftShoulderButtonDown) {
-			glift.dValue = GLPIDPOS[1];
-			motorSet(GLMOTOR, glift.output);
-			motorSet(GLMOTOR, glift.output);
+			glLift.target = GLPIDPOS[1];
+			motorSet(GLMOTOR, glLift.output);
+			motorSet(GLMOTOR, glLift.output);
 			return;
 		}
 
 		else if(leftShoulderButtonUp) {
-			glift.dValue = GLPIDPOS[0];
-			motorSet(GLMOTOR ,glift.output);
+			glLift.target = GLPIDPOS[0];
+			motorSet(GLMOTOR ,glLift.output);
 			return;
 		}
 
 		else if(leftShoulderButtonDown) {
-			glift.dValue = GLPIDPOS[2];
-			motorSet(GLMOTOR, glift.output);
+			glLift.target = GLPIDPOS[2];
+			motorSet(GLMOTOR, glLift.output);
 			return;
 		}
 	}
@@ -248,8 +212,8 @@ void linereader() {
 	if(line <= 2850) {
 		hasCone = true;
 		delay(40);
-		glift.dValue = GLPIDPOS[0];
-		motorSet(GLMOTOR, glift.output);
+		glLift.target = GLPIDPOS[0];
+		motorSet(GLMOTOR, glLift.output);
 		shoulderbutton(hasCone);
 		return;
 	}
@@ -268,6 +232,26 @@ void drive() {
 	}
 }
 
+void jinxMSGSend(){
+	sprintf(jinxSend, "%f", glLift.integral);
+	writeJINXData("integral", jinxSend);
+
+	sprintf(jinxSend, "%f", glLift.derivative);
+	writeJINXData("derivative", jinxSend);
+
+	sprintf(jinxSend, "%d", glLift.error);
+	writeJINXData("Error", jinxSend);
+
+	sprintf(jinxSend, "%d", glLift.output);
+	writeJINXData("output", jinxSend);
+
+	sprintf(jinxSend, "%d", glLift.sensor);
+	writeJINXData("sensor", jinxSend);
+	writeJINXSerial(jinxSend);
+
+
+}
+
 void operatorControl() {
 	/******************
 	*  main function  *
@@ -281,8 +265,10 @@ void operatorControl() {
 		imeGet(0, &count);
 		imeGet(1, &counts);
 		linereader();
-		glpid();
+		pidDo(&glLift);
 		drive();
+		//jinxMSGSend();
+		printf("out(%d), Sen(%d), Kd(%d), err(%d)\n", glLift.output, glLift.sensor, (int)glLift.derivative, glLift.error);
 		delay(20);
 	}
 };

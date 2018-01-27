@@ -1,0 +1,2 @@
+make
+pros flash -f "./"
