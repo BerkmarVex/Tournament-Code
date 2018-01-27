@@ -44,11 +44,17 @@ bool rightR = false;
 bool rightRcheck;
 bool stillPressed = false;
 bool prevRightRcheck = false;
+bool leftL = false;
+bool leftLcheck;
+bool prevLeftLcheck = false;
+bool stillPressedL = false;
+int reverse;
 
 //Function definition
 
 void dualzone();
 void checkPressed();
+void buttonStatus();
 void update();
 void tank();
 void arcade();
@@ -57,6 +63,8 @@ void drive();
 void glpid();
 void shoulderbutton(bool check);
 void linereader();
+void checkPressedL();
+void buttonStatusL();
 
 
 
@@ -81,6 +89,7 @@ void update() {
 	//Functions
 	dualzone();
 	checkPressed();
+	checkPressedL();
 	glLift.sensor = analogRead(POT);
 
 	//Linereader
@@ -144,6 +153,24 @@ void buttonStatus() {
 	}
 }
 
+void buttonStatusL() {
+ /*************************************************************
+	*  This function is used to ensure that the varable rightR  *
+	*  does not get changed if the user holds down the switch   *
+	*  button for more than 20 milliseconds                     *
+ 	*************************************************************/
+	if(leftLcheck == true) {
+		if(leftLcheck == !prevLeftLcheck) {
+			stillPressedL = false;
+		}
+		else{
+			stillPressedL = true;
+		}
+	}
+	else if(leftLcheck == false) {
+		stillPressedL = false;
+	}
+}
 void checkPressed() {
  /*************************************************************
 	*  this function switches tank and arcade controls          *
@@ -159,6 +186,31 @@ void checkPressed() {
 	else if (!stillPressed && rightRcheck && !rightR) {
 		rightR = true;
 	}
+}
+void checkPressedL() {
+ /*************************************************************
+	*  this function switches tank and arcade controls          *
+	*  this if statments take in 3 booleans                     *
+	*  if the button was pressed for an extended amount of time *
+	*	 if the button was pressed                                *
+	*  and the current drive style                              *
+	*************************************************************/
+	buttonStatusL();
+	if (!stillPressedL && rightRcheck && rightR) {
+		leftL = false;
+	}
+	else if (!stillPressedL && rightRcheck && !rightR) {
+		leftL = true;
+	}
+}
+
+void ReverseChange(){
+	if (leftL){
+		reverse = -1;
+	}
+		else if (!leftL){
+			reverse = 1;
+		}
 }
 
 void dualzone() {
@@ -190,8 +242,8 @@ void tank() {
 		left and right motors to the left and right joy sticks  *
 	***********************************************************/
 	update();
-	motorSet(RIGHTMOTOR, -rightJoy);
-	motorSet(LEFTMOTOR, leftJoyV);
+	motorSet(RIGHTMOTOR, reverse * -rightJoy);
+	motorSet(LEFTMOTOR, reverse * leftJoyV);
 
 }
 
@@ -202,13 +254,13 @@ void arcade() {
   *  left and horizontal right joysticks   *
 	******************************************/
 	update();
-	motorSet(RIGHTMOTOR, -leftJoyV + rightJoyH);
-	motorSet(LEFTMOTOR, leftJoyV + rightJoyH);
+	motorSet(RIGHTMOTOR, reverse * (-leftJoyV + rightJoyH));
+	motorSet(LEFTMOTOR, reverse * (leftJoyV + rightJoyH));
 }
 
 void lift(){
-	motorSet(unsigned char channel, int speed);
-	motorSet();
+	motorSet(4, 50);
+	motorSet(5, 50);
 }
 
 
