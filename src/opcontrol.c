@@ -14,10 +14,10 @@ char jinxSend[20];
 
 //Lift variables
 
-bool leftShoulderButtonUp;
-bool leftShoulderButtonDown;
 bool rightShoulderButtonUp;
 bool rightShoulderButtonDown;
+bool leftShoulderButtonUp;
+bool leftShoulderButtonDown;
 
 //Sensor variables
 int count;
@@ -33,6 +33,8 @@ const int RIGHTMOTOR = 2;
 const int GLMOTOR = 9;
 const int GLIGHT = 2;
 const int POT = 1;
+const int LIFTRIGHT = 4; //These might not be the right ports ;p
+const int LIFTLEFT = 5;
 
 //Controller variables
 
@@ -74,10 +76,10 @@ void update() {
 	***********************************************************************/
 
 	//Button Group
-	leftShoulderButtonUp = joystickGetDigital(1, 6, JOY_UP);
-	leftShoulderButtonDown = joystickGetDigital(1, 6, JOY_DOWN);
-	rightShoulderButtonUp = joystickGetDigital(1, 5, JOY_UP);
-	rightShoulderButtonDown = joystickGetDigital(1, 5, JOY_DOWN);
+	rightShoulderButtonUp = joystickGetDigital(1, 6, JOY_UP);
+	rightShoulderButtonDown = joystickGetDigital(1, 6, JOY_DOWN);
+	leftShoulderButtonUp = joystickGetDigital(1, 5, JOY_UP);
+	leftShoulderButtonDown = joystickGetDigital(1, 5, JOY_DOWN);
 
 	//Joystick
 	leftJoyV = joystickGetAnalog(1, 3);
@@ -99,37 +101,41 @@ void update() {
 
 void shoulderbutton(bool check) {
 	update();
-	if(leftShoulderButtonUp || leftShoulderButtonDown) {
-		if(leftShoulderButtonUp && leftShoulderButtonDown) {
+	if(rightShoulderButtonUp || rightShoulderButtonDown) {
+		if(rightShoulderButtonUp && rightShoulderButtonDown) {
 			glLift.target = GLPIDPOS[1];
 			motorSet(GLMOTOR, glLift.output);
 			motorSet(GLMOTOR, glLift.output);
 			return;
 		}
 
-		else if(leftShoulderButtonUp) {
+		else if(rightShoulderButtonUp) {
 			glLift.target = GLPIDPOS[0];
 			motorSet(GLMOTOR ,glLift.output);
 			return;
 		}
 
-		else if(leftShoulderButtonDown) {
+		else if(rightShoulderButtonDown) {
 			glLift.target = GLPIDPOS[2];
 			motorSet(GLMOTOR, glLift.output);
 			return;
 		}
 	}
-	if(rightShoulderButtonUp || rightShoulderButtonDown) {
-		if(rightShoulderButtonUp) {
-			motorSet(GLMOTOR, 100);
+	if(leftShoulderButtonUp || leftShoulderButtonDown) {
+		if(leftShoulderButtonUp) {
+			motorSet(LEFTRIGHT, 75);
+			motorSet(LIFTLEFT, 75);
 			return;
 		}
 		else {
-			motorSet(GLMOTOR, -100);
+			motorSet(LIFTRIGHT, -75);
+			motorSet(LIFTLEFT, -75);
 			return;
 		}
 	}
 	if(!check) {
+		motorSet(LIFTRIGHT, 0);
+		motorSet(LIFTLEFT, 0);
 		motorSet(GLMOTOR, 0);
 		return;
 	}
@@ -259,12 +265,6 @@ void arcade() {
 	motorSet(LEFTMOTOR, reverse * (leftJoyV + rightJoyH));
 }
 
-void lift(){
-	motorSet(4, 50);
-	motorSet(5, 50);
-}
-
-
 void linereader() {
 	update();
 	if(line <= 2850) {
@@ -325,6 +325,7 @@ void operatorControl() {
 		linereader();
 		pidDo(&glLift);
 		drive();
+		lift();
 		//jinxMSGSend();
 		//printf("out(%d), Sen(%d), Kd(%d), err(%d)\n", glLift.output, glLift.sensor, (int)glLift.derivative, glLift.error);
 		delay(20);
