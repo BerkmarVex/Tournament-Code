@@ -4,14 +4,11 @@
 
 #include "main.h"
 #include <pid.h>
-
+#include "tank.c"
+#include "analog.c"
 /*************************
 *  local initialization  *
 **************************/
-
-//JINX
-char jinxSend[20];
-
 //Lift variables
 
 bool leftShoulderButtonUp;
@@ -237,26 +234,6 @@ void drive() {
 	}
 }
 
-void jinxMSGSend(){
-	sprintf(jinxSend, "%f", glLift.integral);
-	writeJINXData("integral", jinxSend);
-
-	sprintf(jinxSend, "%f", glLift.derivative);
-	writeJINXData("derivative", jinxSend);
-
-	sprintf(jinxSend, "%d", glLift.error);
-	writeJINXData("Error", jinxSend);
-
-	sprintf(jinxSend, "%d", glLift.output);
-	writeJINXData("output", jinxSend);
-
-	sprintf(jinxSend, "%d", glLift.sensor);
-	writeJINXData("sensor", jinxSend);
-	writeJINXSerial(jinxSend);
-
-
-}
-
 void operatorControl() {
 	/******************
 	*  main function  *
@@ -272,8 +249,6 @@ void operatorControl() {
 		linereader();
 		pidDo(&glLift);
 		drive();
-		//jinxMSGSend();
-		//printf("out(%d), Sen(%d), Kd(%d), err(%d)\n", glLift.output, glLift.sensor, (int)glLift.derivative, glLift.error);
 		delay(20);
 	}
 };
