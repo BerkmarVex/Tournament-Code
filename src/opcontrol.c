@@ -85,6 +85,7 @@ void update() {
 	rightJoy = joystickGetAnalog(1, 2);
 	rightJoyH = joystickGetAnalog(1, 1);
 	rightRcheck = joystickGetDigital(1, 8, JOY_RIGHT);
+	leftLcheck = joystickGetDigital(1, 7, JOY_LEFT);
 
 	//Functions
 	dualzone();
