@@ -50,7 +50,6 @@ bool leftL = false;
 bool leftLcheck;
 bool prevLeftLcheck = false;
 bool stillPressedL = false;
-int reverse;
 
 //Function definition
 
@@ -67,6 +66,7 @@ void shoulderbutton(bool check);
 void linereader();
 void checkPressedL();
 void buttonStatusL();
+void reverseChange();
 
 
 
@@ -101,33 +101,25 @@ void update() {
 
 void shoulderbutton(bool check) {
 	update();
-	if(rightShoulderButtonUp || rightShoulderButtonDown) {
-		if(rightShoulderButtonUp && rightShoulderButtonDown) {
-			glLift.target = GLPIDPOS[1];
-			motorSet(GLMOTOR, glLift.output);
-			motorSet(GLMOTOR, glLift.output);
-			return;
-		}
 
-		else if(rightShoulderButtonUp) {
-			glLift.target = GLPIDPOS[0];
-			motorSet(GLMOTOR ,glLift.output);
+		if(rightShoulderButtonUp) {
+			motorSet(GLMOTOR ,100);
 			return;
 		}
 
 		else if(rightShoulderButtonDown) {
-			glLift.target = GLPIDPOS[2];
-			motorSet(GLMOTOR, glLift.output);
+			motorSet(GLMOTOR, -100);
 			return;
 		}
-	}
+
+
 	if(leftShoulderButtonUp || leftShoulderButtonDown) {
 		if(leftShoulderButtonUp) {
-			motorSet(LEFTRIGHT, 75);
+			motorSet(LIFTRIGHT, 75);
 			motorSet(LIFTLEFT, 75);
 			return;
 		}
-		else {
+		else{
 			motorSet(LIFTRIGHT, -75);
 			motorSet(LIFTLEFT, -75);
 			return;
@@ -203,22 +195,14 @@ void checkPressedL() {
 	*  and the current drive style                              *
 	*************************************************************/
 	buttonStatusL();
-	if (!stillPressedL && rightRcheck && rightR) {
+	if (!stillPressedL && leftLcheck && leftL) {
 		leftL = false;
 	}
-	else if (!stillPressedL && rightRcheck && !rightR) {
+	else if (!stillPressedL && leftLcheck && !leftL) {
 		leftL = true;
 	}
 }
 
-void ReverseChange(){
-	if (leftL){
-		reverse = -1;
-	}
-		else if (!leftL){
-			reverse = 1;
-		}
-}
 
 void dualzone() {
  /*********************************************************
@@ -249,8 +233,8 @@ void tank() {
 		left and right motors to the left and right joy sticks  *
 	***********************************************************/
 	update();
-	motorSet(RIGHTMOTOR, reverse * -rightJoy);
-	motorSet(LEFTMOTOR, reverse * leftJoyV);
+	motorSet(RIGHTMOTOR, -rightJoy);
+	motorSet(LEFTMOTOR, leftJoyV);
 
 }
 
@@ -261,20 +245,20 @@ void arcade() {
   *  left and horizontal right joysticks   *
 	******************************************/
 	update();
-	motorSet(RIGHTMOTOR, reverse * (-leftJoyV + rightJoyH));
-	motorSet(LEFTMOTOR, reverse * (leftJoyV + rightJoyH));
+	motorSet(RIGHTMOTOR, (-leftJoyV + rightJoyH));
+	motorSet(LEFTMOTOR, (leftJoyV + rightJoyH));
 }
 
 void linereader() {
 	update();
-	if(line <= 2850) {
+	/*if(line <= 2850) {
 		hasCone = true;
 		delay(40);
 		glLift.target = GLPIDPOS[0];
 		motorSet(GLMOTOR, glLift.output);
 		shoulderbutton(hasCone);
 		return;
-	}
+	} */
 
 	hasCone = false;
 	shoulderbutton(hasCone);
@@ -325,7 +309,6 @@ void operatorControl() {
 		linereader();
 		pidDo(&glLift);
 		drive();
-		lift();
 		//jinxMSGSend();
 		//printf("out(%d), Sen(%d), Kd(%d), err(%d)\n", glLift.output, glLift.sensor, (int)glLift.derivative, glLift.error);
 		delay(20);
